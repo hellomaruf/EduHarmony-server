@@ -22,8 +22,9 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const usersCollection = client.db("EduHarmony").collection("users");
-
-    // Connect the client to the server	(optional starting in v4.7)
+    const FeedbackCollection = client
+      .db("EduHarmony")
+      .collection("userFeedback");
 
     // Added user in database as a student
     app.post("/users", async (req, res) => {
@@ -34,6 +35,12 @@ async function run() {
         return res.send({ message: "User is already Exist", insertedId: null });
       }
       const result = await usersCollection.insertOne(users);
+      res.send(result);
+    });
+
+    // get user feedback
+    app.get("/feedback", async (req, res) => {
+      const result = await FeedbackCollection.find().toArray();
       res.send(result);
     });
 
