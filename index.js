@@ -7,7 +7,12 @@ const port = process.env.PORT || 3000;
 
 //middleware
 app.use(express.json());
-app.use(cors());
+const corsOptions = {
+  origin: ["http://localhost:5173", "http://localhost:5174"],
+  credentials: true,
+  optionSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
 
 const uri = `mongodb+srv://${process.env.USER}:${process.env.PASS}@cluster0.0o9qayn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -22,9 +27,12 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const usersCollection = client.db("EduHarmony").collection("users");
-    const FeedbackCollection = client
+    const feedbackCollection = client
       .db("EduHarmony")
       .collection("userFeedback");
+    const applyTeachingCollection = client
+      .db("EduHarmony")
+      .collection("applyTeaching");
 
     // Added user in database as a student
     app.post("/users", async (req, res) => {
@@ -40,7 +48,14 @@ async function run() {
 
     // get user feedback
     app.get("/feedback", async (req, res) => {
-      const result = await FeedbackCollection.find().toArray();
+      const result = await feedbackCollection.find().toArray();
+      res.send(result);
+    });
+
+    // apply for teaching
+    app.post("/applyTeaching", async (req, res) => {
+      const applyTeaching = req.body;
+      const result = await applyTeachingCollection.insertOne(applyTeaching);
       res.send(result);
     });
 
