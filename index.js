@@ -72,19 +72,25 @@ async function run() {
       res.send(result);
     });
 
-      // added abmin role
-      app.patch("/users/:id", async (req, res) => {
-        const id = req.params.id;
-        const filter = { _id: new ObjectId(id) };
-        const updateDoc = {
-          $set: {
-            role: "admin",
-          },
-        };
-        const result = await usersCollection.updateOne(filter, updateDoc);
-        res.send(result);
-      });
+    // added abmin role
+    app.patch("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: "admin",
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
 
+    // Get all teachers request
+    app.get("/teacherRequest", async (req, res) => {
+      const result = await applyTeachingCollection.find().toArray();
+      res.send(result);
+    });
+    
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
