@@ -90,7 +90,20 @@ async function run() {
       const result = await applyTeachingCollection.find().toArray();
       res.send(result);
     });
-    
+
+    // Approve and reject for teacher role
+    app.patch("/teacherApproved/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { email };
+      const updateDoc = {
+        $set: {
+          role: "teacher",
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
