@@ -59,6 +59,13 @@ async function run() {
       res.send(result);
     });
 
+      //Get user role by email
+      app.get("/user/:email", async (req, res) => {
+        const email = req.params.email;
+        const result = await usersCollection.findOne({ email });
+        res.send(result);
+      });
+    
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
