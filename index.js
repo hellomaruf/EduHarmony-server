@@ -26,6 +26,8 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+
+    
     const usersCollection = client.db("EduHarmony").collection("users");
     const feedbackCollection = client
       .db("EduHarmony")
@@ -33,6 +35,8 @@ async function run() {
     const applyTeachingCollection = client
       .db("EduHarmony")
       .collection("applyTeaching");
+    const classCollection = client.db("EduHarmony").collection("classes");
+
 
     // Added user in database as a student
     app.post("/users", async (req, res) => {
@@ -104,6 +108,18 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/teacherApprovedRequest/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id:new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: "teacher",
+        },
+      };
+      const result = await applyTeachingCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
     app.patch("/teacherReject/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -113,6 +129,13 @@ async function run() {
         },
       };
       const result = await applyTeachingCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    // added classes
+    app.post("/class", async (req, res) => {
+      const classes = req.body;
+      const result = await classCollection.insertOne(classes);
       res.send(result);
     });
 
