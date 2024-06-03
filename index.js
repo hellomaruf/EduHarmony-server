@@ -208,6 +208,14 @@ async function run() {
       res.send(result);
     });
 
+    // Get classes details for enroll
+    app.get("/classDetails/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await classCollection.findOne(query);
+      res.send(result);
+    });
+
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
