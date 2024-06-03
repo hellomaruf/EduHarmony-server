@@ -184,6 +184,20 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/updateClass/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateClass = req.body;
+      const updateDoc = {
+        $set: {
+          title: updateClass.title,
+          price: updateClass.price,
+          photo: updateClass.photo,
+        },
+      };
+      const result = await classCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
 
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
