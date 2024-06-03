@@ -176,7 +176,7 @@ async function run() {
       res.send(result);
     });
 
-    // Find class by id
+    // Find class by id for update
     app.get("/update/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -184,6 +184,7 @@ async function run() {
       res.send(result);
     });
 
+    // update Class
     app.patch("/updateClass/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -196,6 +197,14 @@ async function run() {
         },
       };
       const result = await classCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    // Delete class by id
+    app.delete("/deleteClass/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const result = await classCollection.deleteOne(filter);
       res.send(result);
     });
 
