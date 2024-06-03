@@ -168,6 +168,14 @@ async function run() {
       res.send(result);
     });
 
+    // Get all my class data by email
+    app.get("/myClasses/:email", async (req, res) => {
+      const email = req.params.email
+      const query = {email}
+      const result = await classCollection.find(query).toArray();
+      res.send(result);
+    });
+
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
