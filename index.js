@@ -139,6 +139,12 @@ async function run() {
       res.send(result);
     });
 
+    // Get all classes for admin dashboard
+    app.get('/allClassesForAdmin', async (req, res) => {
+      const result = await classCollection.find().toArray()
+      res.send(result)
+    })
+
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
