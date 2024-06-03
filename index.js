@@ -26,8 +26,6 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-
-    
     const usersCollection = client.db("EduHarmony").collection("users");
     const feedbackCollection = client
       .db("EduHarmony")
@@ -36,7 +34,6 @@ async function run() {
       .db("EduHarmony")
       .collection("applyTeaching");
     const classCollection = client.db("EduHarmony").collection("classes");
-
 
     // Added user in database as a student
     app.post("/users", async (req, res) => {
@@ -110,7 +107,7 @@ async function run() {
 
     app.patch("/teacherApprovedRequest/:id", async (req, res) => {
       const id = req.params.id;
-      const filter = { _id:new ObjectId(id) };
+      const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
           role: "teacher",
@@ -140,10 +137,23 @@ async function run() {
     });
 
     // Get all classes for admin dashboard
-    app.get('/allClassesForAdmin', async (req, res) => {
-      const result = await classCollection.find().toArray()
-      res.send(result)
-    })
+    app.get("/allClassesForAdmin", async (req, res) => {
+      const result = await classCollection.find().toArray();
+      res.send(result);
+    });
+
+    // Approve teacher added class
+    app.patch("/approvedClasses/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: "accepted",
+        },
+      };
+      const result = await classCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
 
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
