@@ -35,21 +35,21 @@ async function run() {
       .db("EduHarmony")
       .collection("applyTeaching");
     const classCollection = client.db("EduHarmony").collection("classes");
+    const paymentCollection = client.db("EduHarmony").collection("payments");
 
-
-        // payment intent
-        app.post("/create-payment-intent", async (req, res) => {
-          const { price } = req.body;
-          const amount = parseInt(price * 100);
-          const paymentIntent = await stripe.paymentIntents.create({
-            amount: amount,
-            currency: "usd",
-            payment_method_types: ["card"],
-          });
-          res.send({
-            clientSecret: paymentIntent.client_secret,
-          });
-        });
+    // payment intent
+    app.post("/create-payment-intent", async (req, res) => {
+      const { price } = req.body;
+      const amount = parseInt(price * 100);
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ["card"],
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
 
     // Added user in database as a student
     app.post("/users", async (req, res) => {
@@ -232,13 +232,20 @@ async function run() {
       res.send(result);
     });
 
-      // Get for Payment
-      app.get("/payment/:id", async (req, res) => {
-        const id = req.params.id;
-        const query = { _id: new ObjectId(id) };
-        const result = await classCollection.findOne(query);
-        res.send(result);
-      });
+    // Get for Payment
+    app.get("/payment/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await classCollection.findOne(query);
+      res.send(result);
+    });
+
+    // payment related api
+    app.post("/payment", async (req, res) => {
+      const payment = req.body;
+      const result = await paymentCollection.insertOne(payment);
+      res.send(result);
+    });
 
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
