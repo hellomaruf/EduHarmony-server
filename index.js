@@ -250,10 +250,19 @@ async function run() {
     // my enroll class
     app.get("/myEnroll/:email", async (req, res) => {
       const email = req.params.email;
-      const query = { userEmail : email };
+      const query = { userEmail: email };
       const result = await paymentCollection.find(query).toArray();
       res.send(result);
     });
+
+    // get total enrollment my classId (for teacher details page)
+    app.get("/enrollment/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { classId: id };
+      const result = await paymentCollection.find(query).toArray();
+      res.send(result);
+    });
+    
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
