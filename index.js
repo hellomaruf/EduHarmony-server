@@ -36,6 +36,9 @@ async function run() {
       .collection("applyTeaching");
     const classCollection = client.db("EduHarmony").collection("classes");
     const paymentCollection = client.db("EduHarmony").collection("payments");
+    const assignmentCollection = client
+      .db("EduHarmony")
+      .collection("assignments");
 
     // payment intent
     app.post("/create-payment-intent", async (req, res) => {
@@ -262,7 +265,14 @@ async function run() {
       const result = await paymentCollection.find(query).toArray();
       res.send(result);
     });
-    
+
+    // Post Assignment (Teacher dashboard)
+    app.post("/assignment", async (req, res) => {
+      const assignment = req.body;
+      const result = await assignmentCollection.insertOne(assignment);
+      res.send(result);
+    });
+
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
