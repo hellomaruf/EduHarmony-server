@@ -273,6 +273,13 @@ async function run() {
       res.send(result);
     });
 
+    // get assignment for (teacher dashboard)
+    app.get("/assignment/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { classId: id };
+      const result = await assignmentCollection.find(query).toArray();
+      res.send(result);
+    });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
