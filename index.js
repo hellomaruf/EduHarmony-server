@@ -251,10 +251,18 @@ async function run() {
     });
 
     // get all payments (for home page)
-    app.get('/allPayments', async (req, res) => {
-      const result = await paymentCollection.find().toArray()
-      res.send(result)
-    })
+    app.get("/allPayments", async (req, res) => {
+      const result = await paymentCollection.find().toArray();
+      res.send(result);
+    });
+
+    // get enroll class for (enroll class details page)
+    app.get("/enrollClassDetails/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { classId: id };
+      const result = await assignmentCollection.find(query).toArray();
+      res.send(result);
+    });
 
     // my enroll class
     app.get("/myEnroll/:email", async (req, res) => {
@@ -284,6 +292,13 @@ async function run() {
       const id = req.params.id;
       const query = { classId: id };
       const result = await assignmentCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // user feedback
+    app.post("/feedback", async (req, res) => {
+      const feedback = req.body;
+      const result = await feedbackCollection.insertOne(feedback);
       res.send(result);
     });
     console.log(
