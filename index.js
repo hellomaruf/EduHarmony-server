@@ -250,6 +250,12 @@ async function run() {
       res.send(result);
     });
 
+    // get all payments (for home page)
+    app.get('/allPayments', async (req, res) => {
+      const result = await paymentCollection.find().toArray()
+      res.send(result)
+    })
+
     // my enroll class
     app.get("/myEnroll/:email", async (req, res) => {
       const email = req.params.email;
