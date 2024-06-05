@@ -39,6 +39,9 @@ async function run() {
     const assignmentCollection = client
       .db("EduHarmony")
       .collection("assignments");
+    const assignmentSubmitCollection = client
+      .db("EduHarmony")
+      .collection("submittedAssignments");
 
     // payment intent
     app.post("/create-payment-intent", async (req, res) => {
@@ -301,6 +304,22 @@ async function run() {
       const result = await feedbackCollection.insertOne(feedback);
       res.send(result);
     });
+
+    // Post assignment submission
+    app.post("/assignmentSubmission", async (req, res) => {
+      const assignment = req.body;
+      const result = await assignmentSubmitCollection.insertOne(assignment);
+      res.send(result);
+    });
+
+    // get assignment submissing by id
+    app.get("/assignmentSubmission/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = {classId : id}
+      const result = await assignmentSubmitCollection.find(query).toArray();
+      res.send(result);
+    });
+
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
