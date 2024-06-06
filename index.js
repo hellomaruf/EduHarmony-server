@@ -1,6 +1,7 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
+const jwt = require('jsonwebtoken');
 require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const app = express();
@@ -43,6 +44,32 @@ async function run() {
       .db("EduHarmony")
       .collection("submittedAssignments");
 
+        // jwt generate
+        app.post("/jwt", async (req, res) => {
+          const user = req.body;
+          const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+            expiresIn: "365d",
+          });
+    
+          res.send({ token });
+        });
+
+    // middleware
+    const verifyToken = (req, res, next) => {
+      console.log("From verify token", req.headers);
+      if (!req.headers.authorization) {
+        return res.status(401).send({ message: "Unauthorized Access" });
+      }
+      const token = req.headers.authorization.split(" ")[1];
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+          return res.status(401).send({ message: "Unauthorized Access" });
+        }
+        req.decoded = decoded;
+        next();
+      });
+    };
+    
     // payment intent
     app.post("/create-payment-intent", async (req, res) => {
       const { price } = req.body;
@@ -90,7 +117,8 @@ async function run() {
     });
 
     // get all users
-    app.get("/users", async (req, res) => {
+    app.get("/users",verifyToken, async (req, res) => {
+      console.log(req.headers);
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
