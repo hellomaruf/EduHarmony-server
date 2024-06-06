@@ -259,6 +259,20 @@ async function run() {
       res.send(result);
     });
 
+    // Increment  enrollment count by payment
+    app.patch("/enrollmentCount/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $inc: {
+          totalEnrollment: 1,
+        },
+      };
+      const result = await classCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+
+
     // get enroll class for (enroll class details page)
     app.get("/enrollClassDetails/:id", async (req, res) => {
       const id = req.params.id;
@@ -315,7 +329,7 @@ async function run() {
     // get assignment submissing by id
     app.get("/assignmentSubmission/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {classId : id}
+      const query = { classId: id };
       const result = await assignmentSubmitCollection.find(query).toArray();
       res.send(result);
     });
