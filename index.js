@@ -1,7 +1,7 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const app = express();
@@ -44,15 +44,15 @@ async function run() {
       .db("EduHarmony")
       .collection("submittedAssignments");
 
-        // jwt generate
-        app.post("/jwt", async (req, res) => {
-          const user = req.body;
-          const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: "365d",
-          });
-    
-          res.send({ token });
-        });
+    // jwt generate
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "365d",
+      });
+
+      res.send({ token });
+    });
 
     // middleware
     const verifyToken = (req, res, next) => {
@@ -69,7 +69,7 @@ async function run() {
         next();
       });
     };
-    
+
     // payment intent
     app.post("/create-payment-intent", async (req, res) => {
       const { price } = req.body;
@@ -117,7 +117,7 @@ async function run() {
     });
 
     // get all users
-    app.get("/users",verifyToken, async (req, res) => {
+    app.get("/users", verifyToken, async (req, res) => {
       console.log(req.headers);
       const result = await usersCollection.find().toArray();
       res.send(result);
@@ -187,7 +187,7 @@ async function run() {
     });
 
     // Get all classes for admin dashboard
-    app.get("/allClassesForAdmin", async (req, res) => {
+    app.get("/allClassesForAdmin",verifyToken, async (req, res) => {
       const result = await classCollection.find().toArray();
       res.send(result);
     });
@@ -219,7 +219,7 @@ async function run() {
     });
 
     // Get all my class data by email
-    app.get("/myClasses/:email", async (req, res) => {
+    app.get("/myClasses/:email",verifyToken, async (req, res) => {
       const email = req.params.email;
       const query = { email };
       const result = await classCollection.find(query).toArray();
@@ -300,7 +300,6 @@ async function run() {
       res.send(result);
     });
 
-
     // get enroll class for (enroll class details page)
     app.get("/enrollClassDetails/:id", async (req, res) => {
       const id = req.params.id;
@@ -348,14 +347,14 @@ async function run() {
     });
 
     // Post assignment submission
-    app.post("/assignmentSubmission", async (req, res) => {
+    app.post("/assignmentSubmission",verifyToken, async (req, res) => {
       const assignment = req.body;
       const result = await assignmentSubmitCollection.insertOne(assignment);
       res.send(result);
     });
 
     // get assignment submissing by id
-    app.get("/assignmentSubmission/:id", async (req, res) => {
+    app.get("/assignmentSubmission/:id",verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { classId: id };
       const result = await assignmentSubmitCollection.find(query).toArray();
