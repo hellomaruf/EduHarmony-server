@@ -118,16 +118,16 @@ async function run() {
 
     // get all users
     app.get("/users", async (req, res) => {
-      const page = parseInt(req.query.page)
-      const size = parseInt(req.query.size)
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
       console.log("pagination query", page, size);
-      const count = await usersCollection.find().count()
+      const count = await usersCollection.find().count();
       const result = await usersCollection
         .find()
         .skip(page * size)
         .limit(size)
         .toArray();
-      res.send({result, count});
+      res.send({ result, count });
     });
 
     // added abmin role
@@ -145,8 +145,16 @@ async function run() {
 
     // Get all teachers request
     app.get("/teacherRequest", async (req, res) => {
-      const result = await applyTeachingCollection.find().toArray();
-      res.send(result);
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
+      console.log("pagination query", page, size);
+      const count = await applyTeachingCollection.find().count();
+      const result = await applyTeachingCollection
+        .find()
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      res.send({ result, count });
     });
 
     // Approve and reject for teacher role
@@ -195,7 +203,25 @@ async function run() {
 
     // Get all classes for admin dashboard
     app.get("/allClassesForAdmin", async (req, res) => {
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
+      console.log("pagination query", page, size);
+      const count = await usersCollection.find().count();
+      const result = await classCollection
+        .find()
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      res.send({ result, count });
+    });
+
+    app.get("/allClassForHome", async (req, res) => {
       const result = await classCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/allUsersForHome", async (req, res) => {
+      const result = await usersCollection.find().toArray();
       res.send(result);
     });
 
@@ -234,10 +260,18 @@ async function run() {
 
     // Get all my class data by email
     app.get("/myClasses/:email", verifyToken, async (req, res) => {
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
+      console.log("pagination query", page, size);
+      const count = await usersCollection.find().count();
       const email = req.params.email;
       const query = { email };
-      const result = await classCollection.find(query).toArray();
-      res.send(result);
+      const result = await classCollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      res.send({ result, count });
     });
 
     // Find class by id for update
@@ -281,7 +315,7 @@ async function run() {
     });
 
     // Get for Payment
-    app.get("/payment/:id", verifyToken, async (req, res) => {
+    app.get("/payment/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await classCollection.findOne(query);
