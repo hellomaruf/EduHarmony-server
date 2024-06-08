@@ -103,7 +103,7 @@ async function run() {
     });
 
     // apply for teaching
-    app.post("/applyTeaching", async (req, res) => {
+    app.post("/applyTeaching", verifyToken, async (req, res) => {
       const applyTeaching = req.body;
       const result = await applyTeachingCollection.insertOne(applyTeaching);
       res.send(result);
@@ -117,14 +117,21 @@ async function run() {
     });
 
     // get all users
-    app.get("/users", verifyToken, async (req, res) => {
-      console.log(req.headers);
-      const result = await usersCollection.find().toArray();
-      res.send(result);
+    app.get("/users", async (req, res) => {
+      const page = parseInt(req.query.page)
+      const size = parseInt(req.query.size)
+      console.log("pagination query", page, size);
+      const count = await usersCollection.find().count()
+      const result = await usersCollection
+        .find()
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      res.send({result, count});
     });
 
     // added abmin role
-    app.patch("/users/:id", async (req, res) => {
+    app.patch("/users/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -180,15 +187,22 @@ async function run() {
     });
 
     // added classes
-    app.post("/class", async (req, res) => {
+    app.post("/class", verifyToken, async (req, res) => {
       const classes = req.body;
       const result = await classCollection.insertOne(classes);
       res.send(result);
     });
 
     // Get all classes for admin dashboard
-    app.get("/allClassesForAdmin",verifyToken, async (req, res) => {
+    app.get("/allClassesForAdmin", async (req, res) => {
       const result = await classCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/acceptedClasses/:status", async (req, res) => {
+      const status = req.params.status;
+      const query = { status: status };
+      const result = await classCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -219,7 +233,7 @@ async function run() {
     });
 
     // Get all my class data by email
-    app.get("/myClasses/:email",verifyToken, async (req, res) => {
+    app.get("/myClasses/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
       const query = { email };
       const result = await classCollection.find(query).toArray();
@@ -235,7 +249,7 @@ async function run() {
     });
 
     // update Class
-    app.patch("/updateClass/:id", async (req, res) => {
+    app.patch("/updateClass/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateClass = req.body;
@@ -267,7 +281,7 @@ async function run() {
     });
 
     // Get for Payment
-    app.get("/payment/:id", async (req, res) => {
+    app.get("/payment/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await classCollection.findOne(query);
@@ -275,7 +289,7 @@ async function run() {
     });
 
     // payment related api
-    app.post("/payment", async (req, res) => {
+    app.post("/payment", verifyToken, async (req, res) => {
       const payment = req.body;
       const result = await paymentCollection.insertOne(payment);
       res.send(result);
@@ -309,7 +323,7 @@ async function run() {
     });
 
     // my enroll class
-    app.get("/myEnroll/:email", async (req, res) => {
+    app.get("/myEnroll/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
       const query = { userEmail: email };
       const result = await paymentCollection.find(query).toArray();
@@ -347,14 +361,14 @@ async function run() {
     });
 
     // Post assignment submission
-    app.post("/assignmentSubmission",verifyToken, async (req, res) => {
+    app.post("/assignmentSubmission", verifyToken, async (req, res) => {
       const assignment = req.body;
       const result = await assignmentSubmitCollection.insertOne(assignment);
       res.send(result);
     });
 
     // get assignment submissing by id
-    app.get("/assignmentSubmission/:id",verifyToken, async (req, res) => {
+    app.get("/assignmentSubmission/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { classId: id };
       const result = await assignmentSubmitCollection.find(query).toArray();
