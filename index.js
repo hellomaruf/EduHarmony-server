@@ -101,6 +101,14 @@ async function run() {
       res.send(result);
     });
 
+    // get feedback for progress
+    app.get("/feedbackForProgress/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { classId: id };
+      const result = await feedbackCollection.find(query).toArray();
+      res.send(result);
+    });
+
     // Added user in database as a student
     app.post("/users", async (req, res) => {
       const users = req.body;
@@ -172,6 +180,14 @@ async function run() {
         .limit(size)
         .toArray();
       res.send({ result, count });
+    });
+
+    // get apply teaching collaction for teach on edu form
+    app.get(`/applyInformation/:email`, async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const result = await applyTeachingCollection.findOne(query);
+      res.send(result);
     });
 
     // Approve and reject for teacher role
