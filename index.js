@@ -1,17 +1,42 @@
+require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
+const app = express();
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-const app = express();
 const port = process.env.PORT || 3000;
 
 //middleware
 app.use(express.json());
+// app.use(cors({
+//   origin: '*',
+//   credentials:true
+// }));
+
+// middleware
+const verifyToken = (req, res, next) => {
+  console.log("From verify token", req.headers);
+  if (!req.headers.authorization) {
+    return res.status(401).send({ message: "Unauthorized Access" });
+  }
+  const token = req.headers.authorization.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message: "Unauthorized Access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
 const corsOptions = {
-  origin: ["http://localhost:5173", "http://localhost:5174"],
-  credentials: true,
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://eduharmony-d6114.web.app",
+    "https://eduharmony-d6114.firebaseapp.com",
+  ],
+  // credentials: true,
   optionSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
@@ -48,27 +73,11 @@ async function run() {
     app.post("/jwt", async (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "365d",
+        expiresIn: "1d",
       });
 
       res.send({ token });
     });
-
-    // middleware
-    const verifyToken = (req, res, next) => {
-      console.log("From verify token", req.headers);
-      if (!req.headers.authorization) {
-        return res.status(401).send({ message: "Unauthorized Access" });
-      }
-      const token = req.headers.authorization.split(" ")[1];
-      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-        if (err) {
-          return res.status(401).send({ message: "Unauthorized Access" });
-        }
-        req.decoded = decoded;
-        next();
-      });
-    };
 
     // payment intent
     app.post("/create-payment-intent", async (req, res) => {
@@ -82,6 +91,14 @@ async function run() {
       res.send({
         clientSecret: paymentIntent.client_secret,
       });
+    });
+
+    // classes for progress page
+    app.get("/classesForProgress/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await classCollection.findOne(query);
+      res.send(result);
     });
 
     // Added user in database as a student
@@ -144,7 +161,7 @@ async function run() {
     });
 
     // Get all teachers request
-    app.get("/teacherRequest", async (req, res) => {
+    app.get("/teacherRequest", verifyToken, async (req, res) => {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
       console.log("pagination query", page, size);
@@ -176,6 +193,7 @@ async function run() {
       const updateDoc = {
         $set: {
           role: "teacher",
+          status: "accepted",
         },
       };
       const result = await applyTeachingCollection.updateOne(filter, updateDoc);
@@ -187,7 +205,7 @@ async function run() {
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
-          status: "Reject",
+          status: "reject",
         },
       };
       const result = await applyTeachingCollection.updateOne(filter, updateDoc);
@@ -207,6 +225,7 @@ async function run() {
       const size = parseInt(req.query.size);
       console.log("pagination query", page, size);
       const count = await usersCollection.find().count();
+      console.log(count);
       const result = await classCollection
         .find()
         .skip(page * size)
@@ -259,7 +278,7 @@ async function run() {
     });
 
     // Get all my class data by email
-    app.get("/myClasses/:email", verifyToken, async (req, res) => {
+    app.get("/myClasses/:email", async (req, res) => {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
       console.log("pagination query", page, size);
@@ -272,6 +291,7 @@ async function run() {
         .limit(size)
         .toArray();
       res.send({ result, count });
+      console.log("result ---->", result);
     });
 
     // Find class by id for update
